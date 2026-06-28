@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProposalStatus {
+  PROPOSED
+  REQUESTED
+  CONFIRMED
+}
+
+model Ca {
+  id        String     @id @default(cuid())
+  name      String
+  students  Student[]
+  proposals Proposal[]
+}
+
+model Student {
+  id        String     @id @default(cuid())
+  name      String
+  ca        Ca?        @relation(fields: [caId], references: [id])
+  caId      String?
+  proposals Proposal[]
+}
+
+model Company {
+  id        String        @id @default(cuid())
+  name      String
+  type      String?
+  sessions  InfoSession[]
+  proposals Proposal[]
+}
+
+model InfoSession {
+  id        String     @id @default(cuid())
+  company   Company    @relation(fields: [companyId], references: [id])
+  companyId String
+  startsAt  DateTime
+  location  String
+  capacity  Int
+  remaining Int
+  proposals Proposal[]
+}
+
+model Proposal {
+  id              String         @id @default(cuid())
+  student         Student        @relation(fields: [studentId], references: [id])
+  studentId       String
+  company         Company        @relation(fields: [companyId], references: [id])
+  companyId       String
+  ca              Ca             @relation(fields: [caId], references: [id])
+  caId            String
+  status          ProposalStatus @default(PROPOSED)
+  chosenSession   InfoSession?   @relation(fields: [chosenSessionId], references: [id])
+  chosenSessionId String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
