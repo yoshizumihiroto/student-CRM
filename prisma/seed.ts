@@ -1,6 +1,8 @@
-import { PrismaClient } from '../app/generated/prisma'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '../app/generated/prisma/client'
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   const ca = await prisma.ca.upsert({
@@ -123,10 +125,49 @@ async function main() {
     }),
   ])
 
+  // キャリアビジョンの評価軸
+  const visionItems = [
+    { key: 'challenge', label: '挑戦できる環境', category: '価値観', order: 1 },
+    { key: 'social', label: '社会貢献性', category: '価値観', order: 2 },
+    { key: 'discretion', label: '裁量の大きさ', category: '役割', order: 3 },
+    { key: 'specialty', label: '専門性が磨ける', category: '成長機会', order: 4 },
+    { key: 'training', label: '研修・育成制度', category: '成長機会', order: 5 },
+    { key: 'wlb', label: 'ワークライフバランス', category: '勤務条件', order: 6 },
+    { key: 'salary', label: '給与水準', category: '勤務条件', order: 7 },
+    { key: 'remote', label: 'リモート柔軟性', category: '勤務条件', order: 8 },
+  ]
+
+  const items: Record<string, { id: string }> = {}
+  for (const item of visionItems) {
+    items[item.key] = await prisma.visionItem.upsert({
+      where: { key: item.key },
+      update: { label: item.label, category: item.category, order: item.order },
+      create: item,
+    })
+  }
+
+  // 企業ごとの各軸の充実度（1〜5）
+  const companyScores: [string, Record<string, number>][] = [
+    [companyA.id, { challenge: 5, social: 3, discretion: 4, specialty: 5, training: 3, wlb: 4, salary: 4, remote: 5 }],
+    [companyB.id, { challenge: 5, social: 3, discretion: 5, specialty: 4, training: 4, wlb: 2, salary: 5, remote: 3 }],
+    [companyC.id, { challenge: 3, social: 4, discretion: 3, specialty: 4, training: 5, wlb: 5, salary: 3, remote: 2 }],
+  ]
+
+  for (const [companyId, scores] of companyScores) {
+    for (const [key, score] of Object.entries(scores)) {
+      await prisma.companyVisionScore.upsert({
+        where: { companyId_itemId: { companyId, itemId: items[key].id } },
+        update: { score },
+        create: { companyId, itemId: items[key].id, score },
+      })
+    }
+  }
+
   console.log('Seed completed:', {
     ca: ca.name,
     students: [student1.name, student2.name, student3.name],
     companies: [companyA.name, companyB.name, companyC.name],
+    visionItems: visionItems.length,
   })
 }
 
