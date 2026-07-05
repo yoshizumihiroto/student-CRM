@@ -59,6 +59,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   ))}
                 </div>
               </div>
+
+              <div>
+                <p className="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  学生登録
+                </p>
+                <div className="space-y-0.5">
+                  <NavLink href="/login">👤 ユーザー登録</NavLink>
+                </div>
+              </div>
             </nav>
 
             <div className="px-5 py-3 border-t border-slate-100 text-xs text-slate-400">
