@@ -1,19 +1,15 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import NavLink from './nav-link'
+import { prisma } from '@/lib/prisma'
 
 export const metadata: Metadata = {
   title: '学生管理CRM',
   description: '新卒採用エージェント向け説明会調整ツール',
 }
 
-const students = [
-  { id: 'student-001', name: '山田 太郎' },
-  { id: 'student-002', name: '佐藤 花子' },
-  { id: 'student-003', name: '鈴木 一郎' },
-]
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const students = await prisma.student.findMany({ orderBy: { name: 'asc' } })
   return (
     <html lang="ja" className="h-full">
       <body className="min-h-full bg-slate-50">

@@ -76,10 +76,10 @@ export default async function CaApplicationsPage() {
             <h2 className="font-bold text-slate-800">{student.name}</h2>
             <span className="text-xs text-slate-400">{student.applications.length} 社</span>
             <Link
-              href={`/student/${student.id}/applications`}
+              href={`/student/${student.id}`}
               className="ml-auto text-xs text-blue-600 hover:underline"
             >
-              学生ビューで編集 →
+              学生ページ →
             </Link>
           </div>
 
