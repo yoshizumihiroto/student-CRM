@@ -37,13 +37,18 @@ model Ca {
 }
 
 model Student {
-  id           String               @id @default(cuid())
-  name         String
-  ca           Ca?                  @relation(fields: [caId], references: [id])
-  caId         String?
-  proposals    Proposal[]
-  applications Application[]
-  visionScores StudentVisionScore[]
+  id             String               @id @default(cuid())
+  name           String
+  email          String?              @unique
+  dateOfBirth    DateTime?
+  universityName String?
+  faculty        String?
+  graduationYear Int?
+  ca             Ca?                  @relation(fields: [caId], references: [id])
+  caId           String?
+  proposals      Proposal[]
+  applications   Application[]
+  visionScores   StudentVisionScore[]
 }
 
 // キャリアビジョンの評価軸（価値観・役割・成長機会・勤務条件）
